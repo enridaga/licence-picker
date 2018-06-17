@@ -1,0 +1,7 @@
+<div class="actions btn-group">
+<p>
+<?php foreach($this->get('actions', array()) as $label => $href): ?>
+<a class="btn <?php print ($label == $this->get('actions_select','')) ? 'btn-primary' : 'btn-default' ?> <?php print ($href)?'':'disabled';?>" href="<?php print $href; ?>"><?php print $label; ?></a>
+<?php endforeach; ?>
+</p>
+</div> 

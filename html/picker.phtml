@@ -1,0 +1,158 @@
+<form method="post" action="">
+<input type="hidden" name="controller" value="picker"/>
+<input type="hidden" name="action" value="picker"/>
+<input type="hidden" name="current" value="<?php print $this->itemOf('current','concept'); ?>"/>
+<h4>Answered <small>(Yes: <?php print count($this->get('yes', array()));?>, No: <?php print count($this->get('no', array()));?>)</small>
+
+<?php if(count($this->get('stack'))>0): ?>
+<a class="btn btn-fixed-width btn-primary pull-right btn-xs" href="<?php print route('picker', 'index'); ?>">Restart</a>
+<?php endif;?>
+</h4>
+
+<?php if(count($this->get('yes', array())) == 0 && count($this->get('no', array())) == 0): ?>
+<p class="alert alert-info">You can answer one of the questions below.</p>
+<?php endif; ?>
+<div class="chosen-list">
+
+  <?php 
+  $yc = 0;
+  $nc = 0;
+  $yesanswers = $this->get('yes', array());
+  $noanswers = $this->get('no', array());
+  $stack = $this->get('stack',array());
+  // iterate over the stack to order the answers historically
+  ?>
+  <?php foreach($stack as $sk => $sv):?>
+	  <input type="hidden" name="stack[<?php print $sk;?>]" value="<?php print $sv;?>"/>
+	  <?php if($sv == 'sayyes'): ?>
+	  <?php /* If YES */ $yes = array_shift($yesanswers); ?>
+	      <!-- YES answer -->
+		  <input type="hidden" name="yes[<?php print $yc; ?>]" value="<?php print $yes['concept']; ?>"/>
+		  <?php $yc++; ?>
+		  <div class="row yes-item item">
+		  	<div class="col-lg-10">
+		  	<?php print $yes['question']?>
+		  	</div>
+		  	<div class="col-lg-2">
+		  		<a class="btn-fixed-width btn btn-xs btn-success pull-right btn-disabled">Yes</a>
+		  	</div>
+		  </div>
+		  <?php else: ?>
+	  <?php /* If NO */ $no = array_shift($noanswers); ?>
+		   <!-- NO answer -->
+		  <input type="hidden" name="no[<?php print $nc; ?>]" value="<?php print $no['concept']; ?>"/>
+		  <?php $nc++; ?>
+		  <div class="row no-item item">
+		  	<div class="col-lg-10">
+		  	<?php print $no['question']?>
+		  	</div>
+		  	<div class="col-lg-2">
+		  		<a class="btn-fixed-width btn btn-xs btn-danger pull-right btn-disabled">No</a>
+		  	</div>
+		  </div>
+	  <?php endif; ?>
+  <?php endforeach; ?>
+  
+  <?php /* foreach($this->get('yes', array()) as $yes): ?>
+  <!-- YES answer -->
+  <input type="hidden" name="yes[<?php print $yc; ?>]" value="<?php print $yes['concept']; ?>"/>
+  <?php $yc++; ?>
+  <div class="row yes-item item">
+  	<div class="col-lg-10">
+  	<?php print $yes['question']?>
+  	</div>
+  	<div class="col-lg-2">
+  		<a class="btn-fixed-width btn btn-xs btn-success pull-right btn-disabled">Yes</a>
+  	</div>
+  </div>
+  
+  <?php endforeach; ?>
+  <?php 
+  foreach($this->get('no', array()) as $no): ?>
+  <!-- NO answer -->
+  <input type="hidden" name="no[<?php print $nc; ?>]" value="<?php print $no['concept']; ?>"/>
+  <?php $nc++; ?>
+  <div class="row no-item item">
+  	<div class="col-lg-10">
+  	<?php print $no['question']?>
+  	</div>
+  	<div class="col-lg-2">
+  		<a class="btn-fixed-width btn btn-xs btn-danger pull-right btn-disabled">No</a>
+  	</div>
+  </div>
+  <?php endforeach; */ ?>
+</div>
+<?php 
+/*
+ * IF THER IS ONLY ONE QUESTION CHECK IF WE REACHED THE BOTTOM...
+ * */
+$qnb = count($this->get('questions', array()));
+$isBottom = $this->get('isBottom');
+if($isBottom){
+	// don't show the question
+	$qnb = 0;
+}
+?>
+<h4>Questions <small>(<?php print $qnb;?>)</small>
+<?php if(count($this->get('stack'))>0): ?>
+<button class="btn btn-primary btn-fixed-width pull-right btn-xs" type="submit" name="undo" value="<?php print $this->get('last');?>">Undo</button>
+<?php endif;?>
+</h4>
+<div class="question-list">
+  <?php if($qnb): ?>
+  <?php foreach($this->get('questions', array()) as $question): ?>
+  <input type="hidden" name="questions" value="<?php print $question['concept']; ?>"/>
+  <div class="row question-item item">
+  	<div class="col-lg-10"><?php print $question['question']?></div>
+  	<div class="col-lg-2">
+	<div class="btn-group btn-group-xs pull-right" role="group" aria-label="">
+  		<button type="submit" name="sayyes" value="<?php print $question['concept'];?>" class="btn btn-default" role="group" aria-label="">Yes</button>
+  		<button type="submit" name="sayno" value="<?php print $question['concept'];?>" class="btn btn-default" role="group" aria-label="">No</button>
+	</div>
+	</div>
+  </div>
+  <?php endforeach; ?>
+  <?php else: ?>
+  <div class="alert alert-success">You can choose one of the licences below.</div>
+  <?php endif; ?>
+</div>
+
+<h4>Licences <small>(<?php print count($this->get('licences', array()));?>)</small></h4>
+<div class="licence-list">
+  <?php $grey = FALSE; ?>
+  <?php foreach($this->get('licences', array()) as $licence): ?>
+  <?php $grey = !$grey; ?>
+  <div class="row licence-item item <?php print ($grey) ? 'item-grey' : ''?>">
+  	<div class="col-lg-12"><h5><?php print $licence['label']; ?></h5>
+  	<?php if(isset($licence['link'])): ?>
+  	<small><?php print $licence['licence']; ?></small>
+  	<br><small><a href="<?php print $licence['link']; ?>" target="_blank"><?php print $licence['link']; ?></a></small><br>
+  	<?php endif;?>
+  	<?php foreach($licence['policies'] as $policy => $values): ?>
+  	<?php foreach($values as $val) :?>
+  	<?php 
+  	switch($policy){
+  		case 'permission':
+  			$lt = 'success';
+  			break;
+  		case 'prohibition':
+  			$lt = 'danger';
+  			break;
+  		case 'duty':
+  			$lt = 'warning';
+  			break;
+  	}
+  	?>
+  	<span class="label-policy label label-<?php print $lt;?>">
+  	<?php print $val;?>
+  	</span>
+  	<?php endforeach;?>
+  	<?php if(count($values)>0):?>
+  	<br>
+  	<?php endif;?>
+  	<?php endforeach;?>
+  	</div>
+  </div>
+  <?php endforeach; ?>
+</div>
+</form>
